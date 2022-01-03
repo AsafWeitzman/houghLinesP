@@ -31,11 +31,53 @@ def extract_edges_from_image(img):
     return edges
 
 
+def find_houghLinesP_ret_img(edges_image, origin_img):
+    # linesP = cv2.HoughLinesP(edges_image, 1, np.pi / 180, 50, None, 50, 10) # default from opencv doc
+    rho = 1
+    d = 180
+    threshold = 90
+    minLineLength = 50
+    maxLineGap = 30
+    for i in range(4):
+        # theta
+        theta = np.pi / d
+        linesP = cv2.HoughLinesP(edges_image, rho, theta, threshold, None, minLineLength, maxLineGap)
+
+        # print pointes
+        filter_linesP(linesP)
+        # print pointes
+
+        if linesP is not None:
+            for i in range(0, len(linesP)):
+                l = linesP[i][0]
+                cv2.line(origin_img, (l[0], l[1]), (l[2], l[3]), (0, 0, 255), 1, cv2.LINE_AA)
+                # draw trapeze
+                #cv2.line(origin_img, (75, 480), (280, 310), (67, 23, 52), 2, cv2.LINE_AA)
+                #cv2.line(origin_img, (360, 310), (565, 480), (67, 23, 52), 2, cv2.LINE_AA)
+                #cv2.line(origin_img, (280, 310), (360, 310), (67, 23, 52), 2, cv2.LINE_AA)
+                fontScale = 1
+                cv2.putText(origin_img, f"S: ({l[0]}, {l[1]})", (l[0], l[1]), cv2.FONT_ITALIC, 0.3, 255)
+                cv2.putText(origin_img, f"E: ({l[2]}, {l[3]})", (l[2], l[3]), cv2.FONT_ITALIC, 0.3, 255)
+
+        return origin_img
+
+
+def filter_linesP(lines):
+    if lines is not None:
+        for i in range(0, len(lines)):
+            l = lines[i][0]
+            if True:
+                print(l)
+
 
 
 if __name__ == '__main__':
     img = read_image_from_path(IMG_PATH)
     edge_img = extract_edges_from_image(img)
+    houghLinesP_img = find_houghLinesP_ret_img(edge_img, img)
+
     cv2.imshow('Original', img)
     cv2.imshow('Edge', edge_img)
+    cv2.imshow('houghLinesP', houghLinesP_img)
+
     cv2.waitKey(0)
